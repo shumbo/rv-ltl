@@ -1,0 +1,12 @@
+{
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  },
+  "python.testing.pytestArgs": ["."],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "editor.formatOnSave": true,
+  "python.linting.flake8Enabled": true,
+  "python.formatting.provider": "black",
+  "python.formatting.blackPath": "black"
+}
