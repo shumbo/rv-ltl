@@ -1,10 +1,11 @@
 from functools import reduce
+from typing import Dict, List
 from uuid import uuid4
 
 from rv_ltl.b4 import B4
 
 
-State = dict["Atomic", bool]
+State = Dict["Atomic", bool]
 
 
 class Node:
@@ -53,7 +54,7 @@ class Atomic(Node):
         super().__init__()
         self.name = name
         self.id = uuid4()
-        self.history = list[bool]()
+        self.history: List[bool] = list()
 
     def update(self, m: State) -> None:
         super().update(m)
