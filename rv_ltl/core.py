@@ -8,10 +8,12 @@ State = dict["Atomic", bool]
 
 
 class Node:
-    "the last index of the list"
-    last_index = -1
+    def __init__(self) -> None:
+        self.last_index = -1
+        "the last index of the history list"
 
     def is_future(self, t: int) -> bool:
+        "Checks if the given `t` is in future"
         return t > self.last_index
 
     def clear(self) -> None:
@@ -48,6 +50,7 @@ class ConstantFalse(Node):
 
 class Atomic(Node):
     def __init__(self, name="") -> None:
+        super().__init__()
         self.name = name
         self.id = uuid4()
         self.history = list[bool]()
@@ -69,6 +72,7 @@ class Atomic(Node):
 
 class Not(Node):
     def __init__(self, op: Node) -> None:
+        super().__init__()
         self.op = op
 
     def update(self, m: State) -> None:
@@ -85,6 +89,7 @@ class Not(Node):
 
 class And(Node):
     def __init__(self, *ops: Node) -> None:
+        super().__init__()
         self.ops = ops
 
     def update(self, m: State) -> None:
@@ -103,6 +108,7 @@ class And(Node):
 
 class Or(Node):
     def __init__(self, *ops: Node) -> None:
+        super().__init__()
         self.ops = ops
 
     def update(self, m: State) -> None:
@@ -121,6 +127,7 @@ class Or(Node):
 
 class Next(Node):
     def __init__(self, op: Node):
+        super().__init__()
         self.op = op
 
     def update(self, m: State) -> None:
@@ -146,6 +153,7 @@ class Next(Node):
 
 class Until(Node):
     def __init__(self, lhs: Node, rhs: Node) -> None:
+        super().__init__()
         self.lhs = lhs
         self.rhs = rhs
 
@@ -160,19 +168,19 @@ class Until(Node):
         result = B4.FALSE
         for k in range(i, self.last_index + 1):
             v = self.rhs.evaluate(k)
-            # TODO(shun): What about PRESUMABLY_TRUE?
             if not v.is_truthy:
                 # if not is_truthy, try next k
                 continue
-            # k is truthy
+            # truthy at k
             rhs_satisfied = True
             # check if lhs holds for all previous trace
-            all_satisfied = v  # TODO(shun): Double check
-            for j in range(i, i + k + 1):
+            all_satisfied = v  # if rhs is PRESUMABLY_TRUE, begin with it
+            for j in range(i, min(i + k, self.last_index)):
                 u = self.lhs.evaluate(j)
                 all_satisfied = all_satisfied & u
             # take the best value among all k
             result = result | all_satisfied
+            break  # TODO(shun): Is finding the leftmost k really sufficient?
         if not rhs_satisfied:
             # if rhs is not satisfied, it might be satisfied later, so presumably false
             return B4.PRESUMABLY_FALSE
@@ -184,6 +192,7 @@ class Until(Node):
 
 class Eventually(Node):
     def __init__(self, op: Node) -> None:
+        super().__init__()
         self.original = op
         self.op = Until(ConstantTrue(), op)
 
@@ -201,6 +210,7 @@ class Eventually(Node):
 
 class Always(Node):
     def __init__(self, op: Node) -> None:
+        super().__init__()
         self.original = op
         self.op = Not(Eventually(Not(op)))
 
@@ -218,6 +228,7 @@ class Always(Node):
 
 class Implies(Node):
     def __init__(self, lhs: Node, rhs: Node) -> None:
+        super().__init__()
         self.original_lhs = lhs
         self.original_rhs = rhs
         self.op = Or(Not(lhs), rhs)

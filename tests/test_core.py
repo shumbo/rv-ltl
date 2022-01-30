@@ -151,6 +151,18 @@ def test_until_3():
     assert phi.evaluate() == B4.PRESUMABLY_FALSE
 
 
+def test_until_4():
+    ap1 = Atomic()
+    ap2 = Atomic()
+    phi = Until(ap1, ap2)  # ap1 until ap2
+    phi.update({ap1: True, ap2: False})
+    phi.update({ap1: True, ap2: False})
+    phi.update({ap1: True, ap2: False})
+    phi.update({ap1: False, ap2: True})  # ap1 can be false and still satisfied
+    phi.update({ap1: False, ap2: False})
+    assert phi.evaluate() == B4.TRUE
+
+
 def test_eventually_1():
     ap1 = Atomic()
     phi = Eventually(ap1)
