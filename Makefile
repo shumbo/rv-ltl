@@ -2,6 +2,10 @@
 format:
 	poetry run black .
 
+.PHONY: format-check
+format-check:
+	poetry run black . --check
+
 .PHONY: test
 test:
 	poetry run pytest
