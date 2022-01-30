@@ -164,7 +164,6 @@ class Until(Node):
 
     def evaluate(self, i=0) -> B4:
         # look for time with rhs = True
-        rhs_satisfied = False
         result = B4.FALSE
         for k in range(i, self.last_index + 1):
             v = self.rhs.evaluate(k)
@@ -172,19 +171,15 @@ class Until(Node):
                 # if not is_truthy, try next k
                 continue
             # truthy at k
-            rhs_satisfied = True
             # check if lhs holds for all previous trace
-            all_satisfied = v  # if rhs is PRESUMABLY_TRUE, begin with it
+            result = v  # if rhs is PRESUMABLY_TRUE, begin with it
             for j in range(i, min(i + k, self.last_index)):
                 u = self.lhs.evaluate(j)
-                all_satisfied = all_satisfied & u
+                result = result & u
             # take the best value among all k
-            result = result | all_satisfied
-            break  # TODO(shun): Is finding the leftmost k really sufficient?
-        if not rhs_satisfied:
-            # if rhs is not satisfied, it might be satisfied later, so presumably false
-            return B4.PRESUMABLY_FALSE
-        return result
+            return result  # TODO(shun): Is finding the leftmost k really sufficient?
+        # if no k is found that satisfies rhs, return presumably false
+        return B4.PRESUMABLY_FALSE
 
     def __str__(self) -> str:
         return f"({str(self.lhs)} U {str(self.rhs)})"
