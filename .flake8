@@ -4,3 +4,5 @@ exclude = .git,__pycache__,docs/source/conf.py,old,build,dist,.venv
 # black compatible ref: https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html
 max-line-length = 88
 extend-ignore = E203
+
+per-file-ignores = __init__.py:F401
