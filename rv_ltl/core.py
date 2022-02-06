@@ -178,7 +178,7 @@ class Until(Node):
                 u = self.lhs.evaluate(j)
                 result = result & u
             # take the best value among all k
-            return result  # TODO(shun): Is finding the leftmost k really sufficient?
+            return result
         # if no k is found that satisfies rhs, return presumably false
         return B4.PRESUMABLY_FALSE
 
