@@ -5,6 +5,7 @@ from rv_ltl.core import (
     Atomic,
     Eventually,
     Implies,
+    MissingAtomicsException,
     Next,
     Not,
     And,
@@ -21,6 +22,22 @@ def test_trivial():
     ap2 = Atomic()
     ap2.update({ap2: False})
     assert ap2.evaluate() == B4.FALSE
+
+
+def test_update_missing_1():
+    ap1 = Atomic("atomic_proposition_1")
+    with pytest.raises(MissingAtomicsException) as excinfo:
+        ap1.update({})
+    assert "atomic_proposition_1" in str(excinfo.value)
+
+
+def test_update_missing_2():
+    ap1 = Atomic("atomic_proposition_1")
+    ap2 = Atomic()
+    phi = And(ap1, ap2)
+    with pytest.raises(MissingAtomicsException) as excinfo:
+        phi.update({ap1: True})
+    assert "1 unnamed atomic propotision" in str(excinfo.value)
 
 
 def test_not():
