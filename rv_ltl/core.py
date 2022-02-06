@@ -86,9 +86,6 @@ class Node:
     def evaluate(self) -> B4:
         """
         Evaluate the formula and get the result
-
-        t specifies the time to evaluate
-        i specifies where to start the trace (default: 0)
         """
         return self._evaluate_at(0)
 
