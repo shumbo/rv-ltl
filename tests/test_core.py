@@ -23,23 +23,16 @@ def test_trivial():
     assert ap2.evaluate() == B4.FALSE
 
 
-def test_time():
-    ap1 = Atomic()
-    ap1.update({ap1: True})
-    ap1.update({ap1: True})
-    ap1.update({ap1: False})
-    assert ap1.evaluate(0) == B4.TRUE
-    assert ap1.evaluate(1) == B4.TRUE
-    assert ap1.evaluate(2) == B4.FALSE
-
-
 def test_not():
     ap1 = Atomic()
-    phi = Not(ap1)
-    phi.update({ap1: True})
-    phi.update({ap1: False})
-    assert phi.evaluate(0) == B4.FALSE
-    assert phi.evaluate(1) == B4.TRUE
+    phi1 = Not(ap1)
+    phi1.update({ap1: True})
+    assert phi1.evaluate() == B4.FALSE
+
+    ap2 = Atomic()
+    phi2 = Not(ap2)
+    phi2.update({ap2: True})
+    assert phi2.evaluate() == B4.FALSE
 
 
 def test_not_presumably_true():
@@ -70,7 +63,7 @@ def test_and(v1, v2, expected):
     ap2 = Atomic()
     phi = And(ap1, ap2)
     phi.update({ap1: v1, ap2: v2})
-    assert phi.evaluate(0) == expected
+    assert phi.evaluate() == expected
 
 
 @pytest.mark.parametrize(
@@ -87,7 +80,7 @@ def test_or(v1, v2, expected):
     ap2 = Atomic()
     phi = Or(ap1, ap2)
     phi.update({ap1: v1, ap2: v2})
-    assert phi.evaluate(0) == expected
+    assert phi.evaluate() == expected
 
 
 def test_next():
@@ -95,10 +88,22 @@ def test_next():
     phi = Next(ap1)
     phi.update({ap1: True})
     phi.update({ap1: False})
-    phi.update({ap1: True})
-    assert phi.evaluate(0) == B4.FALSE
-    assert phi.evaluate(1) == B4.TRUE
-    assert phi.evaluate(2) == B4.PRESUMABLY_FALSE
+    assert phi.evaluate() == B4.FALSE
+
+    ap2 = Atomic()
+    phi = Next(ap2)
+    phi.update({ap2: False})
+    phi.update({ap2: True})
+    assert phi.evaluate() == B4.TRUE
+
+    ap3 = Atomic()
+    phi = Next(ap3)
+    phi.update({ap3: True})
+    assert phi.evaluate() == B4.PRESUMABLY_FALSE
+
+    ap4 = Atomic()
+    phi = Next(ap4)
+    assert phi.evaluate() == B4.PRESUMABLY_FALSE
 
 
 def test_always_1():

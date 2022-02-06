@@ -17,24 +17,24 @@ class Node:
         "Checks if the given `t` is in future"
         return t > self.last_index
 
-    def clear(self) -> None:
-        pass
-
     def update(self, m: State) -> None:
         self.last_index += 1
 
-    def evaluate(self, i: int = 0) -> B4:
+    def _evaluate_at(self, i: int = 0) -> B4:
+        raise NotImplementedError()
+
+    def evaluate(self) -> B4:
         """
         Evaluate the formula and get the result
 
         t specifies the time to evaluate
         i specifies where to start the trace (default: 0)
         """
-        raise NotImplementedError()
+        return self._evaluate_at(0)
 
 
 class ConstantTrue(Node):
-    def evaluate(self, i=0) -> B4:
+    def _evaluate_at(self, i=0) -> B4:
         return B4.TRUE
 
     def __str__(self) -> str:
@@ -42,7 +42,7 @@ class ConstantTrue(Node):
 
 
 class ConstantFalse(Node):
-    def evaluate(self, i=0) -> B4:
+    def _evaluate_at(self, i=0) -> B4:
         return B4.FALSE
 
     def __str__(self) -> str:
@@ -62,7 +62,7 @@ class Atomic(Node):
             if k is self:
                 self.history.append(v)
 
-    def evaluate(self, i=0) -> B4:
+    def _evaluate_at(self, i=0) -> B4:
         b = self.history[i]  # self.history[i:][0]
         b4 = B4.from_bool(b)
         return b4
@@ -80,8 +80,8 @@ class Not(Node):
         super().update(m)
         self.op.update(m)
 
-    def evaluate(self, i=0) -> B4:
-        v = ~self.op.evaluate(i)
+    def _evaluate_at(self, i=0) -> B4:
+        v = ~self.op._evaluate_at(i)
         return v
 
     def __str__(self) -> str:
@@ -98,8 +98,8 @@ class And(Node):
         for op in self.ops:
             op.update(m)
 
-    def evaluate(self, i=0) -> B4:
-        values = [op.evaluate(i) for op in self.ops]
+    def _evaluate_at(self, i=0) -> B4:
+        values = [op._evaluate_at(i) for op in self.ops]
         v = reduce(lambda v1, v2: v1 & v2, values)
         return v
 
@@ -117,8 +117,8 @@ class Or(Node):
         for op in self.ops:
             op.update(m)
 
-    def evaluate(self, i=0) -> B4:
-        values = [op.evaluate(i) for op in self.ops]
+    def _evaluate_at(self, i=0) -> B4:
+        values = [op._evaluate_at(i) for op in self.ops]
         v = reduce(lambda v1, v2: v1 | v2, values)
         return v
 
@@ -135,7 +135,7 @@ class Next(Node):
         super().update(m)
         self.op.update(m)
 
-    def evaluate(self, i=0) -> B4:
+    def _evaluate_at(self, i=0) -> B4:
         next_i = i + 1
         # if it is the future
         v = None
@@ -145,7 +145,7 @@ class Next(Node):
             v = B4.PRESUMABLY_FALSE
         # when next is called, children should only consider trace excluding the first
         else:
-            v = self.op.evaluate(next_i)
+            v = self.op._evaluate_at(next_i)
         return v
 
     def __str__(self) -> str:
@@ -163,11 +163,11 @@ class Until(Node):
         self.lhs.update(m)
         self.rhs.update(m)
 
-    def evaluate(self, i=0) -> B4:
+    def _evaluate_at(self, i=0) -> B4:
         # look for time with rhs = True
         result = B4.FALSE
         for k in range(i, self.last_index + 1):
-            v = self.rhs.evaluate(k)
+            v = self.rhs._evaluate_at(k)
             if not v.is_truthy:
                 # if not is_truthy, try next k
                 continue
@@ -175,7 +175,7 @@ class Until(Node):
             # check if lhs holds for all previous trace
             result = v  # if rhs is PRESUMABLY_TRUE, begin with it
             for j in range(i, min(i + k, self.last_index)):
-                u = self.lhs.evaluate(j)
+                u = self.lhs._evaluate_at(j)
                 result = result & u
             # take the best value among all k
             return result
@@ -196,8 +196,8 @@ class Eventually(Node):
         super().update(m)
         self.op.update(m)
 
-    def evaluate(self, i=0) -> B4:
-        v = self.op.evaluate(i)
+    def _evaluate_at(self, i=0) -> B4:
+        v = self.op._evaluate_at(i)
         return v
 
     def __str__(self) -> str:
@@ -214,8 +214,8 @@ class Always(Node):
         super().update(m)
         self.op.update(m)
 
-    def evaluate(self, i=0) -> B4:
-        v = self.op.evaluate(i)
+    def _evaluate_at(self, i=0) -> B4:
+        v = self.op._evaluate_at(i)
         return v
 
     def __str__(self) -> str:
@@ -233,8 +233,8 @@ class Implies(Node):
         super().update(m)
         self.op.update(m)
 
-    def evaluate(self, i=0) -> B4:
-        v = self.op.evaluate(i)
+    def _evaluate_at(self, i=0) -> B4:
+        v = self.op._evaluate_at(i)
         return v
 
     def __str__(self) -> str:
