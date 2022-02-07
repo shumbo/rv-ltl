@@ -27,7 +27,12 @@ class MissingAtomicsException(Exception):
         unnamed_count = len(self.atomics) - len(names)
         s = "Missing atomic propositions: "
         s += ",".join(
-            [",".join(names), f"{unnamed_count} unnamed atomic propotision(s)"]
+            names
+            + (
+                [f"{unnamed_count} unnamed atomic propotision(s)"]
+                if unnamed_count > 0
+                else []
+            )
         )
         return s
 
