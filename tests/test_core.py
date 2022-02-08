@@ -24,15 +24,21 @@ def test_trivial():
     assert ap2.evaluate() == B4.FALSE
 
 
+def test_update_by_id():
+    phi = And(Atomic(identifier="alice"), Atomic(identifier="bob"))
+    phi.update({"alice": True, "bob": True})
+    assert phi.evaluate() == B4.TRUE
+
+
 def test_update_missing_1():
-    ap1 = Atomic("atomic_proposition_1")
+    ap1 = Atomic(name="atomic_proposition_1")
     with pytest.raises(MissingAtomicsException) as excinfo:
         ap1.update({})
     assert "atomic_proposition_1" in str(excinfo.value)
 
 
 def test_update_missing_2():
-    ap1 = Atomic("atomic_proposition_1")
+    ap1 = Atomic(name="atomic_proposition_1")
     ap2 = Atomic()
     phi = And(ap1, ap2)
     with pytest.raises(MissingAtomicsException) as excinfo:
@@ -212,8 +218,8 @@ def test_implies_2():
 
 
 def test_request_response():
-    request = Atomic("request")
-    response = Atomic("request")
+    request = Atomic(name="request")
+    response = Atomic(name="response")
     # always (request -> eventually (response))
     phi = Always(Implies(request, Eventually(response)))
     phi.update({request: False, response: False})

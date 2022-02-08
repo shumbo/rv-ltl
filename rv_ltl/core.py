@@ -1,12 +1,12 @@
 from functools import reduce
 import operator
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Union
 from uuid import uuid4
 
 from rv_ltl.b4 import B4
 
 
-State = Dict["Atomic", bool]
+State = Dict[Union["Atomic", str], bool]
 
 
 class MissingAtomicsException(Exception):
@@ -22,7 +22,7 @@ class MissingAtomicsException(Exception):
     def __str__(self) -> str:
         names = []
         for ap in self.atomics:
-            if ap.name is not None and ap.name != "":
+            if ap.name != "":
                 names.append(ap.name)
         unnamed_count = len(self.atomics) - len(names)
         s = "Missing atomic propositions: "
@@ -50,7 +50,7 @@ class Node:
         """
         Accept all children nodes with a new state
 
-        Pass a state as a map from atomic propositions to booleans
+        Pass a state as a map from atomic propositions or identifiers to booleans
         You must pass all atomic propositions under the node
 
         Raises `MissingAtomicsException` if some atomic propositions are missing
@@ -59,8 +59,26 @@ class Node:
         nodes: Set["Node"] = set(self._flatten())
         atomics = set(filter(lambda node: isinstance(node, Atomic), nodes))
 
+        # create a map from identifiers to instances
+        id_to_atomics = {}
+        for ap in atomics:
+            id_to_atomics[ap.identifier] = ap
+
         # get all atomics nodes specified in the given state
-        specified_atomics = set(m.keys())
+        specified_atomics = set()
+
+        # a map from atomic instances to values
+        instance_to_value = {}
+
+        for k, v in m.items():
+            if isinstance(k, Atomic):
+                specified_atomics.add(k)
+                instance_to_value[k] = v
+            if isinstance(k, str):
+                ap = id_to_atomics.get(k)
+                if ap is not None:
+                    specified_atomics.add(ap)
+                    instance_to_value[ap] = v
 
         # raise an error if there is a missing atomic proposition
         missing = atomics.difference(specified_atomics)
@@ -69,7 +87,7 @@ class Node:
 
         # call _internal_update on each node
         for node in nodes:
-            node._update_internal(m)
+            node._update_internal(instance_to_value)
 
     def _update_internal(self, m: State) -> None:
         self._last_index += 1
@@ -112,10 +130,21 @@ class ConstantFalse(Node):
 
 
 class Atomic(Node):
-    def __init__(self, name="") -> None:
+    """
+    Atomic propositions that hold boolean values for each timestep
+    """
+
+    def __init__(self, *, name="", identifier=uuid4()) -> None:
+        """
+        Construct an atomic proposition.
+
+        Args:
+            name: Name for the atomic proposition. Useful for debugging purposes.
+            identifier: Identifier that can be used in `update`
+        """
         super().__init__()
         self.name = name
-        self.id = uuid4()
+        self.identifier = identifier
         self.history: List[bool] = list()
 
     def _update_internal(self, m: State) -> None:
@@ -130,7 +159,11 @@ class Atomic(Node):
         return b4
 
     def __str__(self) -> str:
-        return self.name
+        # if name is specified, use it
+        if self.name != "":
+            return f"({self.name})"
+        # otherwise, use the identifier
+        return f"({self.identifier})"
 
 
 class Not(Node):
@@ -205,7 +238,7 @@ class Next(Node):
         return v
 
     def __str__(self) -> str:
-        return f"(X({str(self.op)}))"
+        return f"(next {str(self.op)})"
 
 
 class Until(Node):
@@ -237,7 +270,7 @@ class Until(Node):
         return B4.PRESUMABLY_FALSE
 
     def __str__(self) -> str:
-        return f"({str(self.lhs)} U {str(self.rhs)})"
+        return f"({str(self.lhs)} until {str(self.rhs)})"
 
 
 class Eventually(Node):
