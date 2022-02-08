@@ -134,7 +134,7 @@ class Atomic(Node):
     Atomic propositions that hold boolean values for each timestep
     """
 
-    def __init__(self, *, name="", identifier=uuid4()) -> None:
+    def __init__(self, *, name="", identifier=None) -> None:
         """
         Construct an atomic proposition.
 
@@ -144,7 +144,7 @@ class Atomic(Node):
         """
         super().__init__()
         self.name = name
-        self.identifier = identifier
+        self.identifier = identifier if identifier is not None else uuid4()
         self.history: List[bool] = list()
 
     def _update_internal(self, m: State) -> None:
