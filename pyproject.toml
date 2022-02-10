@@ -14,6 +14,7 @@ flake8 = "^4.0.1"
 pep8-naming = "^0.12.1"
 autopep8 = "^1.6.0"
 pytest-cov = "^3.0.0"
+pyinstrument = "^4.1.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
