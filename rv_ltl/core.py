@@ -42,6 +42,9 @@ class Node:
         self._last_index = -1
         "the last index of the history list"
 
+        self._cache = {}
+        "Cache used for memoizing results"
+
     def is_future(self, t: int) -> bool:
         "Checks if the given `t` is in future"
         return t > self._last_index
@@ -79,6 +82,19 @@ class Node:
         Traverses the tree and return all nodes as a list
         """
         return [self]
+
+    @staticmethod
+    def memoize_evaluate_at(eval_at):
+        def wrapper(self: Node, i: int) -> B4:
+            key = (self._last_index, i)
+            cached = self._cache.get(key)
+            if cached is not None:
+                return cached
+            result = eval_at(self, i)
+            self._cache[key] = result
+            return result
+
+        return wrapper
 
     def _evaluate_at(self, i: int = 0) -> B4:
         """
@@ -124,6 +140,7 @@ class Atomic(Node):
             if k is self:
                 self.history.append(v)
 
+    @Node.memoize_evaluate_at
     def _evaluate_at(self, i=0) -> B4:
         b = self.history[i]  # self.history[i:][0]
         b4 = B4.from_bool(b)
@@ -141,6 +158,7 @@ class Not(Node):
     def _flatten(self):
         return [self] + self.op._flatten()
 
+    @Node.memoize_evaluate_at
     def _evaluate_at(self, i=0) -> B4:
         v = ~self.op._evaluate_at(i)
         return v
@@ -157,6 +175,7 @@ class And(Node):
     def _flatten(self):
         return [self] + reduce(operator.concat, [op._flatten() for op in self.ops])
 
+    @Node.memoize_evaluate_at
     def _evaluate_at(self, i=0) -> B4:
         values = [op._evaluate_at(i) for op in self.ops]
         v = reduce(lambda v1, v2: v1 & v2, values)
@@ -174,6 +193,7 @@ class Or(Node):
     def _flatten(self):
         return [self] + reduce(operator.concat, [op._flatten() for op in self.ops])
 
+    @Node.memoize_evaluate_at
     def _evaluate_at(self, i=0) -> B4:
         values = [op._evaluate_at(i) for op in self.ops]
         v = reduce(lambda v1, v2: v1 | v2, values)
@@ -191,6 +211,7 @@ class Next(Node):
     def _flatten(self):
         return [self] + self.op._flatten()
 
+    @Node.memoize_evaluate_at
     def _evaluate_at(self, i=0) -> B4:
         next_i = i + 1
         # if it is the future
@@ -217,6 +238,7 @@ class Until(Node):
     def _flatten(self):
         return [self] + self.lhs._flatten() + self.rhs._flatten()
 
+    @Node.memoize_evaluate_at
     def _evaluate_at(self, i=0) -> B4:
         # look for time with rhs = True
         result = B4.FALSE
@@ -249,6 +271,7 @@ class Eventually(Node):
     def _flatten(self) -> List["Node"]:
         return [self] + self.op._flatten()
 
+    @Node.memoize_evaluate_at
     def _evaluate_at(self, i=0) -> B4:
         v = self.op._evaluate_at(i)
         return v
@@ -266,6 +289,7 @@ class Always(Node):
     def _flatten(self) -> List["Node"]:
         return [self] + self.op._flatten()
 
+    @Node.memoize_evaluate_at
     def _evaluate_at(self, i=0) -> B4:
         v = self.op._evaluate_at(i)
         return v
@@ -284,6 +308,7 @@ class Implies(Node):
     def _flatten(self):
         return [self] + self.op._flatten()
 
+    @Node.memoize_evaluate_at
     def _evaluate_at(self, i=0) -> B4:
         v = self.op._evaluate_at(i)
         return v
