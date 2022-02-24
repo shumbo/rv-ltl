@@ -46,6 +46,16 @@ def test_update_missing_2():
     assert "1 unnamed atomic propotision" in str(excinfo.value)
 
 
+def test_clear():
+    ap1 = Atomic(name="ap1")
+    phi = Always(ap1)
+    phi.update({ap1: False})
+    assert phi.evaluate() == B4.FALSE
+    phi.clear()
+    phi.update({ap1: True})
+    assert phi.evaluate() == B4.PRESUMABLY_TRUE
+
+
 def test_not():
     ap1 = Atomic()
     phi1 = Not(ap1)

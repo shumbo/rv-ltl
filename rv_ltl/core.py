@@ -89,8 +89,19 @@ class Node:
         for node in nodes:
             node._update_internal(instance_to_value)
 
+    def clear(self):
+        """
+        Clear past updates and restore the original state
+        """
+        nodes: Set["Node"] = set(self._flatten())
+        for node in nodes:
+            node._clear_internal()
+
     def _update_internal(self, m: State) -> None:
         self._last_index += 1
+
+    def _clear_internal(self):
+        self._last_index = -1
 
     def _flatten(self) -> List["Node"]:
         """
@@ -152,6 +163,10 @@ class Atomic(Node):
         for k, v in m.items():
             if k is self:
                 self.history.append(v)
+
+    def _clear_internal(self):
+        super()._clear_internal()
+        self.history = []
 
     def _evaluate_at(self, i=0) -> B4:
         b = self.history[i]  # self.history[i:][0]
