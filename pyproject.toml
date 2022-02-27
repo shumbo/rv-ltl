@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "rv-ltl"
-version = "0.1.0"
+name = "rv_ltl"
+version = "0.1.0a1"
 description = ""
-authors = ["Shun <shunthedev@gmail.com>"]
+authors = ["Shun Kashiwa <shunthedev@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7, <3.11"
