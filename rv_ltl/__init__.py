@@ -1,11 +1,7 @@
 __version__ = "0.1.0"
 
 from .b4 import B4
-from .core import (
-    MissingAtomicsException,
-    Node,
-    ConstantTrue,
-    ConstantFalse,
+from .proposition import (
     Atomic,
     Not,
     And,
@@ -16,3 +12,5 @@ from .core import (
     Always,
     Implies,
 )
+from .exceptions import MissingAtomicsException
+from .monitor import Monitor
