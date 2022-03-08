@@ -1,3 +1,5 @@
+"Exceptions that are used across the package"
+
 from typing import Set
 
 

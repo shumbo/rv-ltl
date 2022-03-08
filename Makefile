@@ -18,3 +18,8 @@ test-cov:
 .PHONY: lint
 lint:
 	poetry run flake8
+
+.PHONY: docs
+docs:
+	- rm -r html
+	poetry run pdoc --html rv_ltl

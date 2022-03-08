@@ -1,3 +1,5 @@
+"Provide classes to compose RV-LTL formulae"
+
 from typing import Union
 from uuid import uuid4
 from .monitor import (
@@ -16,6 +18,11 @@ from .monitor import (
 
 class Proposition:
     def create_monitor(self) -> Monitor:
+        """Using the proposition, create a monitor that can be used to evaluate a trace
+
+        Returns:
+            Monitor: A monitor for this proposition
+        """
         raise NotImplementedError()
 
 
