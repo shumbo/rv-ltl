@@ -1,3 +1,5 @@
+"Provides four-valued boolean value"
+
 from enum import unique, Enum
 
 

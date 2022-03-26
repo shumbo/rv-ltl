@@ -11,7 +11,7 @@ from rv_ltl.proposition import (
     Or,
     Until,
 )
-from rv_ltl.exceptions import MissingAtomicsException
+from rv_ltl.exception import MissingAtomicsException
 
 
 def test_trivial():

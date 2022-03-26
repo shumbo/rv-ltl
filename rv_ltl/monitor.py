@@ -1,8 +1,10 @@
+"Provides Monitor to evaluate traces"
+
 from functools import reduce
 from operator import concat
 from typing import Any, Dict, List, Set, Union
 from rv_ltl.b4 import B4
-from .exceptions import MissingAtomicsException
+from .exception import MissingAtomicsException
 
 Step = Dict[Union[Any, str], bool]
 
@@ -12,6 +14,14 @@ class Monitor:
         self._last_index = -1
 
     def update(self, step: Step):
+        """takes a step of the trace
+
+        Args:
+            step (Step): A dictionary that represents a step
+
+        Raises:
+            MissingAtomicsException: When not all atomic propositions are specified
+        """
         # get all atomic nodes on the tree
         nodes: Set["Monitor"] = set(self._flatten())
         atomic_monitors: Set[AtomicMonitor] = set(
