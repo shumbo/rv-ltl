@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "rv_ltl"
-version = "0.1.0a2"
-description = ""
+version = "0.1.0"
+description = "Runtime Verification Linear Temporal Logic (RV-LTL) in Python"
 authors = ["Shun Kashiwa <shunthedev@gmail.com>"]
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.7"
