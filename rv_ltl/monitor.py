@@ -204,7 +204,7 @@ class UntilMonitor(_BinaryMonitor):
             # truthy at k
             # check if lhs holds for all previous trace
             result = v  # if rhs is PRESUMABLY_TRUE, begin with it
-            for j in range(i, min(i + k, self._last_index)):
+            for j in range(i, k):
                 u = self.lhs._evaluate_at(j)
                 result = result & u
             # take the best value among all k

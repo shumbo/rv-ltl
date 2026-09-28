@@ -13,6 +13,20 @@ from rv_ltl.proposition import (
 )
 from rv_ltl.exception import MissingAtomicsException
 
+A = Atomic(identifier="A")
+B = Atomic(identifier="B")
+
+
+def evaluate(proposition, trace):
+    """Evaluate proposition on a trace with 2 APs encoded as a string.
+
+    At each step, either "A" holds, "B" holds, or neither holds (written "-").
+    """
+    monitor = proposition.create_monitor()
+    for step in trace:
+        monitor.update({"A": step == "A", "B": step == "B"})
+    return monitor.evaluate()
+
 
 def test_trivial():
     ap1 = Atomic()
@@ -223,6 +237,26 @@ def test_until_4():
     m.update({ap1: False, ap2: True})  # ap1 can be false and still satisfied
     m.update({ap1: False, ap2: False})
     assert m.evaluate() == B4.TRUE
+
+
+@pytest.mark.parametrize(
+    "proposition, trace, expected",
+    (
+        # Evaluated from step 1
+        (Next(Until(A, B)), "-AB--", B4.TRUE),
+        (Next(Until(A, B)), "-AAB-", B4.TRUE),
+        (Next(Until(A, B)), "-A-B-", B4.FALSE),
+        # Evaluated from step 2
+        (Next(Next(Until(A, B))), "--AB--", B4.TRUE),
+        # Evaluated from every step
+        (Always(Until(A, B)), "AABB", B4.PRESUMABLY_TRUE),
+        (Always(Until(A, B)), "ABB", B4.PRESUMABLY_TRUE),
+        (Always(Until(A, B)), "ABAB", B4.PRESUMABLY_TRUE),
+        (Always(Until(A, B)), "AB-B", B4.FALSE),
+    ),
+)
+def test_until_after_step_zero(proposition, trace, expected):
+    assert evaluate(proposition, trace) == expected
 
 
 def test_eventually_1():
