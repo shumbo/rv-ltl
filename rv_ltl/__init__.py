@@ -6,7 +6,9 @@ Runtime Verification Linear Temporal Logic (RV-LTL).
 .. include:: ./README.md
 """
 
-__version__ = "0.1.0a1"
+from importlib.metadata import version as _version
+
+__version__ = _version("rv-ltl")
 
 from .b4 import B4
 from .proposition import (
