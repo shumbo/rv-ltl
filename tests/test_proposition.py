@@ -16,6 +16,7 @@ from rv_ltl.exception import MissingAtomicsException
 A = Atomic(identifier="A")
 B = Atomic(identifier="B")
 
+
 def evaluate(proposition, trace):
     """Evaluate proposition on a trace with 2 APs encoded as a string.
 
@@ -252,7 +253,7 @@ def test_until_4():
         (Always(Until(A, B)), "ABB", B4.PRESUMABLY_TRUE),
         (Always(Until(A, B)), "ABAB", B4.PRESUMABLY_TRUE),
         (Always(Until(A, B)), "AB-B", B4.FALSE),
-    )
+    ),
 )
 def test_until_after_step_zero(proposition, trace, expected):
     assert evaluate(proposition, trace) == expected
