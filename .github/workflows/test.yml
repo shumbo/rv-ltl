@@ -21,8 +21,11 @@ jobs:
       - name: Install Poetry
         run: pipx install poetry
       - name: Install dependencies
+        # Create the venv with the stdlib so it doesn't depend on Poetry's
+        # bundled virtualenv, which no longer supports Python 3.8.
         run: |
-          poetry env use python
+          python -m venv .venv
+          poetry config virtualenvs.in-project true
           poetry install --no-interaction
       - name: Check formatting
         run: make format-check
@@ -44,8 +47,11 @@ jobs:
       - name: Install Poetry
         run: pipx install poetry
       - name: Install dependencies
+        # Create the venv with the stdlib so it doesn't depend on Poetry's
+        # bundled virtualenv, which no longer supports Python 3.8.
         run: |
-          poetry env use python
+          python -m venv .venv
+          poetry config virtualenvs.in-project true
           poetry install --no-interaction
       - name: Run tests
         run: make test
